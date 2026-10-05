@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submundo SP - Festival de Funk & Underground Urbano</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            black: '#070709',
+                            dark: '#0e1015',
+                            card: '#16181d',
+                            border: '#2a2d36',
+                            neonGreen: '#00ff66',
+                            neonOrange: '#ff3300',
+                            grayText: '#9ca3af'
+                        }
+                    },
+                    fontFamily: {
+                        syne: ['Syne', 'sans-serif'],
+                        oswald: ['Oswald', 'sans-serif'],
+                        mono: ['Space Grotesk', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- FontAwesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Space+Grotesk:wght@400;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+
+    <script>
+        // Core Navigation Function - Defined globally before page loads
+        function navigate(pageId) {
+            if (!pageId) return;
+
+            // Hide all pages
+            const pages = document.querySelectorAll('.page-content');
+            pages.forEach(function(page) {
+                page.classList.add('hidden');
+            });
+
+            // Show target page
+            const target = document.getElementById('page-' + pageId);
+            if (target) {
+                target.classList.remove('hidden');
+            }
+
+            // Update navbar styling
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(function(link) {
+                link.classList.remove('active', 'text-brand-neonGreen');
+                link.classList.add('text-white');
+            });
+            
+            const activeNav = document.getElementById('nav-' + pageId);
+            if (activeNav) {
+                activeNav.classList.add('active', 'text-brand-neonGreen');
+                activeNav.classList.remove('text-white');
+            }
+
+            // Close mobile menu if open
+            const mobileMenu = document.getElementById('mobile-menu');
+            if (mobileMenu && !mobileMenu.classList.contains('hidden')) {
+                mobileMenu.classList.add('hidden');
+            }
+
+            // Smooth scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Mobile Menu Toggle
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            if (menu) {
+                menu.classList.toggle('hidden');
+            }
+        }
+
+        // Filter Lineup by Day
+        function filterLineup(day) {
+            const cards = document.querySelectorAll('.artist-card');
+            const buttons = document.querySelectorAll('.filter-btn');
+
+            buttons.forEach(function(btn) {
+                btn.classList.remove('bg-brand-neonGreen', 'text-brand-black');
+                btn.classList.add('bg-brand-card', 'text-white');
+            });
+
+            const activeBtn = document.getElementById('btn-filter-' + day);
+            if (activeBtn) {
+                activeBtn.classList.remove('bg-brand-card', 'text-white');
+                activeBtn.classList.add('bg-brand-neonGreen', 'text-brand-black');
+            }
+
+            cards.forEach(function(card) {
+                if (day === 'todos') {
+                    card.classList.remove('hidden');
+                } else if (day === 'sabado') {
+                    if (card.classList.contains('lineup-sabado')) {
+                        card.classList.remove('hidden');
+                    } else {
+                        card.classList.add('hidden');
+                    }
+                } else if (day === 'domingo') {
+                    if (card.classList.contains('lineup-domingo')) {
+                        card.classList.remove('hidden');
+                    } else {
+                        card.classList.add('hidden');
+                    }
+                }
+            });
+        }
+
+        // Ticket Simulation Toast
+        function buyTicket(name, price) {
+            const modal = document.getElementById('cart-modal');
+            const nameElem = document.getElementById('cart-ticket-name');
+            const priceElem = document.getElementById('cart-ticket-price');
+            if (modal && nameElem && priceElem) {
+                nameElem.innerText = name;
+                priceElem.innerText = 'R$ ' + price + ',00 (Simulação)';
+                modal.classList.remove('hidden');
+            }
+        }
+
+        // FAQ Toggle Accordion
+        function toggleFaq(num) {
+            const ans = document.getElementById('faq-ans-' + num);
+            const icon = document.getElementById('faq-icon-' + num);
+            
+            if (ans && icon) {
+                if (ans.classList.contains('hidden')) {
+                    ans.classList.remove('hidden');
+                    icon.classList.remove('fa-plus');
+                    icon.classList.add('fa-minus');
+                } else {
+                    ans.classList.add('hidden');
+                    icon.classList.remove('fa-minus');
+                    icon.classList.add('fa-plus');
+                }
+            }
+        }
+
+        // Contact Form Submission Handler
+        function handleContactSubmit(e) {
+            e.preventDefault();
+            const alertBox = document.getElementById('contact-success');
+            if (alertBox) {
+                alertBox.classList.remove('hidden');
+            }
+            e.target.reset();
+        }
+
+        // Initialize default view on DOM load
+        document.addEventListener('DOMContentLoaded', function() {
+            navigate('index');
+        });
+    </script>
+
+    <style>
+        body {
+            background-color: #070709;
+            color: #ffffff;
+            font-family: 'Space Grotesk', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .title-glitch {
+            font-family: 'Syne', sans-serif;
+            letter-spacing: -0.04em;
+            text-transform: uppercase;
+            text-shadow: 2px 2px 0px #ff3300, -2px -2px 0px #00ff66;
+        }
+
+        .urban-border {
+            border: 2px solid #2a2d36;
+            transition: all 0.2s ease;
+        }
+
+        .urban-border:hover {
+            border-color: #00ff66;
+            box-shadow: 0 0 15px rgba(0, 255, 102, 0.2);
+        }
+
+        .neon-btn {
+            background-color: #00ff66;
+            color: #070709;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-family: 'Oswald', sans-serif;
+            letter-spacing: 0.05em;
+            transition: all 0.2s ease;
+            box-shadow: 4px 4px 0px #ff3300;
+        }
+
+        .neon-btn:hover {
+            background-color: #ffffff;
+            box-shadow: 6px 6px 0px #00ff66;
+            transform: translate(-2px, -2px);
+        }
+
+        .nav-link {
+            font-family: 'Oswald', sans-serif;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            position: relative;
+        }
+
+        .nav-link.active::after, .nav-link:hover::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: #00ff66;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #070709;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2a2d36;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00ff66;
+        }
+
+        .bg-grid {
+            background-size: 40px 40px;
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        }
+    </style>
+</head>
+<body class="bg-brand-black min-h-screen flex flex-col justify-between">
+
+    <div class="bg-brand-neonOrange text-brand-black px-4 py-2 font-mono text-xs font-bold flex justify-between items-center z-50 sticky top-0 border-b border-black">
+        <div class="flex items-center space-x-2">
+            <i class="fa-solid fa-code text-sm"></i>
+            <span>ENTREGA DE PROJETO IA: Arquivos HTML, CSS & README disponíveis</span>
+        </div>
+        <button onclick="toggleModal()" class="bg-brand-black text-brand-neonGreen px-3 py-1 font-mono uppercase text-xs hover:bg-white hover:text-black transition flex items-center gap-2">
+            <i class="fa-solid fa-file-code"></i>
+            Ver / Copiar Arquivos do VS Code
+        </button>
+    </div>
+
+    <header class="bg-brand-dark border-b border-brand-border sticky top-8 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <!-- Logo -->
+                <button onclick="navigate('index')" class="flex items-center gap-3 text-left focus:outline-none">
+                    <div class="w-10 h-10 bg-brand-neonGreen text-brand-black flex items-center justify-center font-black font-syne text-xl">
+                        S
+                    </div>
+                    <div>
+                        <span class="title-glitch font-syne text-2xl font-extrabold tracking-tighter block leading-none">SUBMUNDO</span>
+                        <span class="text-brand-neonOrange font-mono text-xs tracking-widest uppercase font-bold">SÃO PAULO // 2026</span>
+                    </div>
+                </button>
+
+                <!-- Desktop Nav Menu -->
+                <nav class="hidden md:flex space-x-8">
+                    <button onclick="navigate('index')" id="nav-index" class="nav-link text-brand-neonGreen py-2 text-sm font-semibold active">Início</button>
+                    <button onclick="navigate('lineup')" id="nav-lineup" class="nav-link text-white hover:text-brand-neonGreen py-2 text-sm font-semibold">Line-Up</button>
+                    <button onclick="navigate('ingressos')" id="nav-ingressos" class="nav-link text-white hover:text-brand-neonGreen py-2 text-sm font-semibold">Ingressos</button>
+                    <button onclick="navigate('informacoes')" id="nav-informacoes" class="nav-link text-white hover:text-brand-neonGreen py-2 text-sm font-semibold">Informações</button>
+                    <button onclick="navigate('faq')" id="nav-faq" class="nav-link text-white hover:text-brand-neonGreen py-2 text-sm font-semibold">FAQ & Contato</button>
+                </nav>
+
+                <!-- Mobile Menu Button -->
+                <div class="md:hidden">
+                    <button onclick="toggleMobileMenu()" class="text-white p-2 focus:outline-none">
+                        <i class="fa-solid fa-bars text-2xl text-brand-neonGreen"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-brand-card border-b border-brand-border px-4 pt-2 pb-4 space-y-2">
+            <button onclick="navigate('index')" class="block w-full text-left py-2 px-3 text-white font-oswald text-lg hover:bg-brand-border">INÍCIO</button>
+            <button onclick="navigate('lineup')" class="block w-full text-left py-2 px-3 text-white font-oswald text-lg hover:bg-brand-border">LINE-UP</button>
+            <button onclick="navigate('ingressos')" class="block w-full text-left py-2 px-3 text-white font-oswald text-lg hover:bg-brand-border">INGRESSOS</button>
+            <button onclick="navigate('informacoes')" class="block w-full text-left py-2 px-3 text-white font-oswald text-lg hover:bg-brand-border">INFORMAÇÕES</button>
+            <button onclick="navigate('faq')" class="block w-full text-left py-2 px-3 text-white font-oswald text-lg hover:bg-brand-border">FAQ & CONTATO</button>
+        </div>
+    </header>
+
+    <main class="flex-grow">
+        
+        <!-- PAGE 1: INDEX / HOME -->
+        <section id="page-index" class="page-content bg-grid">
+            <!-- Hero Banner -->
+            <div class="relative min-h-[85vh] flex items-center justify-center border-b border-brand-border overflow-hidden px-4">
+                <div class="absolute inset-0 bg-gradient-to-t from-brand-black via-transparent to-black opacity-80"></div>
+                
+                <div class="absolute inset-0 z-0 opacity-20 pointer-events-none flex items-center justify-center">
+                    <img src="https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=1600&q=80" alt="Urban Crowd" class="w-full h-full object-cover filter grayscale contrast-200">
+                </div>
+
+                <div class="relative z-10 max-w-5xl text-center space-y-6">
+                    <div class="inline-block bg-brand-neonOrange text-brand-black px-4 py-1 text-sm font-mono font-bold uppercase tracking-widest">
+                        O Maior Baile Underground de SP
+                    </div>
+                    
+                    <h1 class="title-glitch font-syne text-6xl sm:text-8xl md:text-9xl font-black leading-none tracking-tight">
+                        SUBMUNDO<br><span class="text-brand-neonGreen">SP 2026</span>
+                    </h1>
+
+                    <p class="text-gray-300 font-mono text-base md:text-xl max-w-2xl mx-auto border-l-2 border-brand-neonGreen pl-4 text-left md:text-center md:border-l-0 md:pl-0">
+                        O som grave rasgando a noite no Galpão Industrial do Brás. Três palcos, 48 horas de funk paulista, mandrake e vertentes do grave urbano.
+                    </p>
+
+                    <div class="pt-4 flex flex-col sm:flex-row justify-center gap-4 text-left sm:text-center">
+                        <div class="bg-brand-card p-4 urban-border">
+                            <span class="block text-brand-neonOrange font-mono text-xs uppercase">Data</span>
+                            <span class="font-oswald text-xl text-white">14 E 15 DE NOVEMBRO</span>
+                        </div>
+                        <div class="bg-brand-card p-4 urban-border">
+                            <span class="block text-brand-neonGreen font-mono text-xs uppercase">Local</span>
+                            <span class="font-oswald text-xl text-white">GALPÃO INDUSTRIAL - BRÁS / SP</span>
+                        </div>
+                    </div>
+
+                    <div class="pt-6">
+                        <button onclick="navigate('ingressos')" class="neon-btn text-xl px-10 py-4 font-bold inline-flex items-center gap-3">
+                            <i class="fa-solid fa-ticket"></i> Garantir Meu Ingresso
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Destaques das Atrações Principais -->
+            <div class="max-w-7xl mx-auto px-4 py-16">
+                <div class="border-b border-brand-border pb-4 mb-10 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+                    <div>
+                        <span class="text-brand-neonGreen font-mono text-xs uppercase font-bold tracking-widest">// HEADLINERS</span>
+                        <h2 class="font-syne text-4xl text-white font-extrabold uppercase tracking-tight">DESTAQUES DO SUBMUNDO</h2>
+                    </div>
+                    <button onclick="navigate('lineup')" class="text-brand-neonOrange font-oswald text-lg hover:underline flex items-center gap-2">
+                        Ver Line-Up Completo <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <!-- Headliner 1 -->
+                    <div class="bg-brand-card urban-border group overflow-hidden">
+                        <div class="h-80 overflow-hidden relative">
+                            <img src="https://images.unsplash.com/photo-1571266028243-e4733b0f0bb1?auto=format&fit=crop&w=800&q=80" alt="DJ Arana" class="w-full h-full object-cover filter grayscale group-hover:grayscale-0 group-hover:scale-105 transition duration-500">
+                            <div class="absolute top-3 left-3 bg-brand-neonGreen text-brand-black px-2 py-1 font-mono text-xs font-bold">PALCO SUBMUNDO</div>
+                        </div>
+                        <div class="p-6">
+                            <h3 class="font-syne text-3xl font-extrabold text-white">DJ ARANA</h3>
+                            <p class="text-brand-grayText font-mono text-sm mt-1">O Mago dos Montagens SP</p>
+                            <div class="mt-4 pt-4 border-t border-brand-border flex justify-between text-xs font-mono text-gray-400">
+                                <span>SÁBADO - 14/NOV</span>
+                                <span class="text-brand-neonOrange font-bold">02:30H</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Headliner 2 -->
+                    <div class="bg-brand-card urban-border group overflow-hidden">
+                        <div class="h-80 overflow-hidden relative">
+                            <img src="https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=800&q=80" alt="MC Ryan SP" class="w-full h-full object-cover filter grayscale group-hover:grayscale-0 group-hover:scale-105 transition duration-500">
+                            <div class="absolute top-3 left-3 bg-brand-neonOrange text-brand-black px-2 py-1 font-mono text-xs font-bold">PALCO MANDRAKE</div>
+                        </div>
+                        <div class="p-6">
+                            <h3 class="font-syne text-3xl font-extrabold text-white">MC RYAN SP</h3>
+                            <p class="text-brand-grayText font-mono text-sm mt-1">Gordo do Pião & Hits do Funk</p>
+                            <div class="mt-4 pt-4 border-t border-brand-border flex justify-between text-xs font-mono text-gray-400">
+                                <span>DOMINGO - 15/NOV</span>
+                                <span class="text-brand-neonOrange font-bold">00:00H</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Headliner 3 -->
+                    <div class="bg-brand-card urban-border group overflow-hidden">
+                        <div class="h-80 overflow-hidden relative">
+                            <img src="https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&w=800&q=80" alt="DJ GBR" class="w-full h-full object-cover filter grayscale group-hover:grayscale-0 group-hover:scale-105 transition duration-500">
+                            <div class="absolute top-3 left-3 bg-brand-neonGreen text-brand-black px-2 py-1 font-mono text-xs font-bold">PALCO SUBMUNDO</div>
+                        </div>
+                        <div class="p-6">
+                            <h3 class="font-syne text-3xl font-extrabold text-white">DJ GBR</h3>
+                            <p class="text-brand-grayText font-mono text-sm mt-1">Pioneiro do Rave Funk</p>
+                            <div class="mt-4 pt-4 border-t border-brand-border flex justify-between text-xs font-mono text-gray-400">
+                                <span>SÁBADO - 14/NOV</span>
+                                <span class="text-brand-neonOrange font-bold">23:00H</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAGE 2: LINEUP -->
+        <section id="page-lineup" class="page-content hidden max-w-7xl mx-auto px-4 py-12">
+            <div class="mb-10 text-center md:text-left">
+                <span class="text-brand-neonOrange font-mono text-xs font-bold tracking-widest uppercase">// PROGRAMAÇÃO COMPLETA</span>
+                <h1 class="font-syne text-5xl md:text-6xl font-extrabold text-white uppercase mt-1">LINE-UP OFICIAL</h1>
+                <p class="text-brand-grayText font-mono text-sm mt-2 max-w-xl">Mais de 8 atrações confirmadas divididas em 2 palcos de puro grave industrial.</p>
+            </div>
+
+            <!-- Filters -->
+            <div class="flex flex-wrap gap-3 mb-10 border-b border-brand-border pb-6">
+                <button id="btn-filter-todos" onclick="filterLineup('todos')" class="filter-btn bg-brand-neonGreen text-brand-black font-oswald px-5 py-2 font-bold uppercase text-sm border border-brand-neonGreen">Todos os Artistas</button>
+                <button id="btn-filter-sabado" onclick="filterLineup('sabado')" class="filter-btn bg-brand-card text-white font-oswald px-5 py-2 font-bold uppercase text-sm border border-brand-border hover:border-brand-neonGreen">Sábado (14/NOV)</button>
+                <button id="btn-filter-domingo" onclick="filterLineup('domingo')" class="filter-btn bg-brand-card text-white font-oswald px-5 py-2 font-bold uppercase text-sm border border-brand-border hover:border-brand-neonGreen">Domingo (15/NOV)</button>
+            </div>
+
+            <!-- Lineup Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" id="lineup-container">
+                
+                <!-- Artist 1 -->
+                <div class="artist-card lineup-sabado bg-brand-card urban-border">
+                    <div class="h-64 relative overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1571266028243-e4733b0f0bb1?auto=format&fit=crop&w=600&q=80" alt="DJ Arana" class="w-full h-full object-cover filter grayscale hover:grayscale-0 transition duration-300">
+                        <span class="absolute top-2 left-2 bg-brand-black text-brand-neonGreen border border-brand-neonGreen px-2 py-0.5 text-xs font-mono font-bold">PALCO SUBMUNDO</span>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-syne text-2xl font-bold text-white uppercase">DJ ARANA</h3>
+                        <div class="mt-2 text-xs font-mono text-gray-400 flex justify-between">
+                            <span>SÁBADO</span>
+                            <span class="text-brand-neonOrange font-bold">02:30H</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Artist 2 -->
+                <div class="artist-card lineup-domingo bg-brand-card urban-border">
+                    <div class="h-64 relative overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=600&q=80" alt="MC Ryan SP" class="w-full h-full object-cover filter grayscale hover:grayscale-0 transition duration-300">
+                        <span class="absolute top-2 left-2 bg-brand-black text-brand-neonOrange border border-brand-neonOrange px-2 py-0.5 text-xs font-mono font-bold">PALCO MANDRAKE</span>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-syne text-2xl font-bold text-white uppercase">MC RYAN SP</h3>
+                        <div class="mt-2 text-xs font-mono text-gray-400 flex justify-between">
+                            <span>DOMINGO</span>
+                            <span class="text-brand-neonOrange font-bold">00:00H</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Artist 3 -->
+                <div class="artist-card lineup-sabado bg-brand-card urban-border">
+                    <div class="h-64 relative overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&w=600&q=80" alt="DJ GBR" class="w-full h-full object-cover filter grayscale hover:grayscale-0 transition duration-300">
+                        <span class="absolute top-2 left-2 bg-brand-black text-brand-neonGreen border border-brand-neonGreen px-2 py-0.5 text-xs font-mono font-bold">PALCO SUBMUNDO</span>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-syne text-2xl font-bold text-white uppercase">DJ GBR</h3>
+                        <div class="mt-2 text-xs font-mono text-gray-400 flex justify-between">
+                            <span>SÁBADO</span>
+                            <span class="text-brand-neonOrange font-bold">23:00H</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Artist 4 -->
+                <div class="artist-card lineup-domingo bg-brand-card urban-border">
+                    <div class="h-64 relative overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=600&q=80" alt="MC IG" class="w-full h-full object-cover filter grayscale hover:grayscale-0 transition duration-300">
+                        <span class="absolute top-2 left-2 bg-brand-black text-brand-neonOrange border border-brand-neonOrange px-2 py-0.5 text-xs font-mono font-bold">PALCO MANDRAKE</span>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-syne text-2xl font-bold text-white uppercase">MC IG</h3>
+                        <div class="mt-2 text-xs font-mono text-gray-400 flex justify-between">
+                            <span>DOMINGO</span>
+                            <span class="text-brand-neonOrange font-bold">01:30H</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Artist 5 -->
+                <div class="artist-card lineup-sabado bg-brand-card urban-border">
+                    <div class="h-64 relative overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=600&q=80" alt="DJ K" class="w-full h-full object-cover filter grayscale hover:grayscale-0 transition duration-300">
+                        <span class="absolute top-2 left-2 bg-brand-black text-brand-neonGreen border border-brand-neonGreen px-2 py-0.5 text-xs font-mono font-bold">PALCO SUBMUNDO</span>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-syne text-2xl font-bold text-white uppercase">DJ K</h3>
+                        <div class="mt-2 text-xs font-mono text-gray-400 flex justify-between">
+                            <span>SÁBADO</span>
+                            <span class="text-brand-neonOrange font-bold">01:00H</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Artist 6 -->
+                <div class="artist-card lineup-domingo bg-brand-card urban-border">
+                    <div class="h-64 relative overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=600&q=80" alt="MC HARIEL" class="w-full h-full object-cover filter grayscale hover:grayscale-0 transition duration-300">
+                        <span class="absolute top-2 left-2 bg-brand-black text-brand-neonOrange border border-brand-neonOrange px-2 py-0.5 text-xs font-mono font-bold">PALCO MANDRAKE</span>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-syne text-2xl font-bold text-white uppercase">MC HARIEL</h3>
+                        <div class="mt-2 text-xs font-mono text-gray-400 flex justify-between">
+                            <span>DOMINGO</span>
+                            <span class="text-brand-neonOrange font-bold">22:30H</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Artist 7 -->
+                <div class="artist-card lineup-sabado bg-brand-card urban-border">
+                    <div class="h-64 relative overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=600&q=80" alt="DJ BL3CK" class="w-full h-full object-cover filter grayscale hover:grayscale-0 transition duration-300">
+                        <span class="absolute top-2 left-2 bg-brand-black text-brand-neonGreen border border-brand-neonGreen px-2 py-0.5 text-xs font-mono font-bold">PALCO SUBMUNDO</span>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-syne text-2xl font-bold text-white uppercase">DJ BL3CK</h3>
+                        <div class="mt-2 text-xs font-mono text-gray-400 flex justify-between">
+                            <span>SÁBADO</span>
+                            <span class="text-brand-neonOrange font-bold">21:30H</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Artist 8 -->
+                <div class="artist-card lineup-domingo bg-brand-card urban-border">
+                    <div class="h-64 relative overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?auto=format&fit=crop&w=600&q=80" alt="MC PH" class="w-full h-full object-cover filter grayscale hover:grayscale-0 transition duration-300">
+                        <span class="absolute top-2 left-2 bg-brand-black text-brand-neonOrange border border-brand-neonOrange px-2 py-0.5 text-xs font-mono font-bold">PALCO MANDRAKE</span>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-syne text-2xl font-bold text-white uppercase">MC PH</h3>
+                        <div class="mt-2 text-xs font-mono text-gray-400 flex justify-between">
+                            <span>DOMINGO</span>
+                            <span class="text-brand-neonOrange font-bold">21:00H</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- PAGE 3: INGRESSOS -->
+        <section id="page-ingressos" class="page-content hidden max-w-7xl mx-auto px-4 py-12">
+            <div class="mb-12 text-center">
+                <span class="text-brand-neonGreen font-mono text-xs font-bold tracking-widest uppercase">// VENDAS LIBERADAS</span>
+                <h1 class="font-syne text-5xl font-extrabold text-white uppercase mt-1">GARANTA SEU INGRESSO</h1>
+                <p class="text-brand-grayText font-mono text-sm mt-2">Escolha seu setor e garanta presença no baile do ano. Lote 2 disponível.</p>
+            </div>
+
+            <!-- Tickets Grid (3 Types) -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                
+                <!-- Ticket 1: Pista Mandrake -->
+                <div class="bg-brand-card urban-border p-8 flex flex-col justify-between relative">
+                    <div class="space-y-4">
+                        <div class="bg-brand-border text-white text-xs font-mono py-1 px-3 inline-block">LOTE 2</div>
+                        <h3 class="font-syne text-3xl font-extrabold text-white uppercase">PISTA MANDRAKE</h3>
+                        <div class="border-b border-brand-border pb-4">
+                            <span class="font-syne text-5xl font-extrabold text-brand-neonGreen">R$ 70</span>
+                            <span class="text-xs font-mono text-gray-400 block mt-1">+ Taxa de conveniência</span>
+                        </div>
+                        <ul class="space-y-3 font-mono text-sm text-gray-300">
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-brand-neonGreen"></i> Acesso aos 2 Palcos Principais</li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-brand-neonGreen"></i> Praça de Alimentação & Bares</li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-brand-neonGreen"></i> Acesso às Áreas de Descanso</li>
+                        </ul>
+                    </div>
+                    <button onclick="buyTicket('Pista Mandrake', 70)" class="mt-8 neon-btn w-full py-3">COMPRAR PISTA</button>
+                </div>
+
+                <!-- Ticket 2: VIP Camarote Submundo -->
+                <div class="bg-brand-card border-2 border-brand-neonGreen p-8 flex flex-col justify-between relative shadow-lg shadow-brand-neonGreen/10">
+                    <div class="absolute -top-3 right-4 bg-brand-neonGreen text-brand-black px-3 py-0.5 text-xs font-mono font-bold uppercase">Mais Vendido</div>
+                    <div class="space-y-4">
+                        <div class="bg-brand-neonOrange text-brand-black text-xs font-mono py-1 px-3 inline-block font-bold">LOTE 2</div>
+                        <h3 class="font-syne text-3xl font-extrabold text-white uppercase">CAMAROTE SUBMUNDO</h3>
+                        <div class="border-b border-brand-border pb-4">
+                            <span class="font-syne text-5xl font-extrabold text-brand-neonOrange">R$ 150</span>
+                            <span class="text-xs font-mono text-gray-400 block mt-1">+ Taxa de conveniência</span>
+                        </div>
+                        <ul class="space-y-3 font-mono text-sm text-gray-300">
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-brand-neonGreen"></i> Entrada Exclusiva Sem Filas</li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-brand-neonGreen"></i> Visão Elevada para o Palco Submundo</li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-brand-neonGreen"></i> Banheiros Premium Container</li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-brand-neonGreen"></i> Bar Exclusivo no Camarote</li>
+                        </ul>
+                    </div>
+                    <button onclick="buyTicket('Camarote Submundo', 150)" class="mt-8 bg-brand-neonOrange text-brand-black font-oswald text-xl font-bold py-3 uppercase hover:bg-white transition">COMPRAR CAMAROTE</button>
+                </div>
+
+                <!-- Ticket 3: Backstage Pass -->
+                <div class="bg-brand-card urban-border p-8 flex flex-col justify-between relative">
+                    <div class="space-y-4">
+                        <div class="bg-brand-border text-white text-xs font-mono py-1 px-3 inline-block">LOTE ÚNICO</div>
+                        <h3 class="font-syne text-3xl font-extrabold text-white uppercase">BACKSTAGE PASS</h3>
+                        <div class="border-b border-brand-border pb-4">
+                            <span class="font-syne text-5xl font-extrabold text-white">R$ 320</span>
+                            <span class="text-xs font-mono text-gray-400 block mt-1">+ Taxa de conveniência</span>
+                        </div>
+                        <ul class="space-y-3 font-mono text-sm text-gray-300">
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-brand-neonGreen"></i> Acesso Restrito Atrás dos DJs</li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-brand-neonGreen"></i> Kit Exclusivo Submundo (Copo + Kit Mandrake)</li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-brand-neonGreen"></i> Open Bar de Bebidas Selecionadas</li>
+                        </ul>
+                    </div>
+                    <button onclick="buyTicket('Backstage Pass', 320)" class="mt-8 border-2 border-white text-white font-oswald text-xl font-bold py-3 uppercase hover:bg-white hover:text-black transition">COMPRAR BACKSTAGE</button>
+                </div>
+
+            </div>
+
+            <!-- Toast Modal -->
+            <div id="cart-modal" class="hidden fixed bottom-6 right-6 bg-brand-neonGreen text-brand-black p-4 font-mono font-bold shadow-xl border-2 border-black max-w-sm z-50">
+                <div class="flex items-center justify-between gap-4">
+                    <div>
+                        <span class="block text-xs uppercase">Simulação de Compra:</span>
+                        <span id="cart-ticket-name" class="font-syne text-lg uppercase block"></span>
+                        <span id="cart-ticket-price" class="text-sm"></span>
+                    </div>
+                    <button onclick="document.getElementById('cart-modal').classList.add('hidden')" class="bg-black text-white px-2 py-1 text-xs">FECHAR</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAGE 4: INFORMAÇÕES -->
+        <section id="page-informacoes" class="page-content hidden max-w-7xl mx-auto px-4 py-12">
+            <div class="mb-10">
+                <span class="text-brand-neonOrange font-mono text-xs font-bold tracking-widest uppercase">// GUIA DO EVENTO</span>
+                <h1 class="font-syne text-5xl font-extrabold text-white uppercase mt-1">COMO CHEGAR & REGRAS</h1>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                <!-- Endereço e Como Chegar -->
+                <div class="space-y-6">
+                    <div class="bg-brand-card p-6 urban-border">
+                        <h2 class="font-syne text-2xl font-bold text-white mb-4 uppercase"><i class="fa-solid fa-location-dot text-brand-neonGreen mr-2"></i> Localização</h2>
+                        <p class="font-mono text-gray-300">
+                            <strong>Galpão Industrial Brás</strong><br>
+                            Rua do Galpão, 1042 - Brás, São Paulo - SP<br>
+                            CEP: 03001-000
+                        </p>
+                    </div>
+
+                    <div class="bg-brand-card p-6 urban-border space-y-4">
+                        <h2 class="font-syne text-2xl font-bold text-white mb-2 uppercase"><i class="fa-solid fa-route text-brand-neonOrange mr-2"></i> Como Chegar</h2>
+                        
+                        <div class="border-l-2 border-brand-neonGreen pl-4">
+                            <h3 class="font-oswald text-lg text-white">DE METRÔ / TREM</h3>
+                            <p class="font-mono text-sm text-gray-400">Estação Brás (Linha 3-Vermelha e CPTM). Caminhada de 8 minutos até o galpão.</p>
+                        </div>
+
+                        <div class="border-l-2 border-brand-neonOrange pl-4">
+                            <h3 class="font-oswald text-lg text-white">DE UBER / TÁXI</h3>
+                            <p class="font-mono text-sm text-gray-400">Ponto de desembarque oficial na Rua do Galpão, com staff e iluminação na via.</p>
+                        </div>
+                    </div>
+
+                    <!-- Simulated Industrial Map SVG -->
+                    <div class="bg-brand-card p-4 urban-border">
+                        <h3 class="font-oswald text-lg text-white mb-2 uppercase">Mapa do Galpão Industrial</h3>
+                        <div class="w-full h-64 bg-brand-black relative flex items-center justify-center border border-brand-border">
+                            <svg width="100%" height="100%" viewBox="0 0 400 200" class="w-full h-full">
+                                <rect width="400" height="200" fill="#0c0d10" />
+                                <rect x="20" y="20" width="360" height="160" fill="none" stroke="#2a2d36" stroke-width="2" stroke-dasharray="5,5" />
+                                <rect x="20" y="90" width="10" height="40" fill="#00ff66" />
+                                <text x="35" y="115" fill="#00ff66" font-family="Space Grotesk" font-size="10">ENTRADA</text>
+                                <rect x="280" y="30" width="80" height="50" fill="#ff3300" opacity="0.8" />
+                                <text x="290" y="60" fill="#ffffff" font-family="Syne" font-size="10" font-weight="bold">PALCO SUBMUNDO</text>
+                                <rect x="280" y="120" width="80" height="50" fill="#00ff66" opacity="0.8" />
+                                <text x="290" y="150" fill="#000000" font-family="Syne" font-size="10" font-weight="bold">PALCO MANDRAKE</text>
+                                <circle cx="150" cy="50" r="15" fill="#2a2d36" />
+                                <text x="142" y="54" fill="#ffffff" font-family="Space Grotesk" font-size="9">BAR</text>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Regras do Evento -->
+                <div class="space-y-6">
+                    <div class="bg-brand-card p-6 urban-border">
+                        <h2 class="font-syne text-2xl font-bold text-white mb-4 uppercase text-brand-neonGreen"><i class="fa-solid fa-circle-check mr-2"></i> O que PODE levar</h2>
+                        <ul class="space-y-2 font-mono text-sm text-gray-300">
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-angle-right text-brand-neonGreen"></i> Óculos Juliet / Lentes espelhadas</li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-angle-right text-brand-neonGreen"></i> Documento oficial com foto (Obrigatório)</li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-angle-right text-brand-neonGreen"></i> Carregador portátil de celular</li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-angle-right text-brand-neonGreen"></i> Capa de chuva e casaco leve</li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-angle-right text-brand-neonGreen"></i> Desodorante roll-on plástico</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-brand-card p-6 urban-border">
+                        <h2 class="font-syne text-2xl font-bold text-white mb-4 uppercase text-brand-neonOrange"><i class="fa-solid fa-circle-xmark mr-2"></i> O que NÃO PODE levar</h2>
+                        <ul class="space-y-2 font-mono text-sm text-gray-300">
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-xmark text-brand-neonOrange"></i> Garrafas de vidro ou latas</li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-xmark text-brand-neonOrange"></i> Objetos cortantes, perfurantes ou guarda-chuvas com ponta</li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-xmark text-brand-neonOrange"></i> Camisas de times de futebol nacionais</li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-xmark text-brand-neonOrange"></i> Câmeras fotográficas profissionais (DSLR com lente removível)</li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-xmark text-brand-neonOrange"></i> Substâncias ilícitas de qualquer natureza</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAGE 5: FAQ & CONTATO -->
+        <section id="page-faq" class="page-content hidden max-w-7xl mx-auto px-4 py-12">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                
+                <!-- FAQ Accordion -->
+                <div>
+                    <div class="mb-8">
+                        <span class="text-brand-neonGreen font-mono text-xs font-bold tracking-widest uppercase">// TIRE SUAS DÚVIDAS</span>
+                        <h1 class="font-syne text-4xl font-extrabold text-white uppercase mt-1">PERGUNTAS FREQUENTES</h1>
+                    </div>
+
+                    <div class="space-y-4" id="faq-accordion">
+                        
+                        <!-- Q1 -->
+                        <div class="bg-brand-card urban-border">
+                            <button onclick="toggleFaq(1)" class="w-full text-left p-4 font-oswald text-lg text-white flex justify-between items-center focus:outline-none">
+                                <span>1. Qual a classificação de idade do Submundo SP?</span>
+                                <i id="faq-icon-1" class="fa-solid fa-plus text-brand-neonGreen"></i>
+                            </button>
+                            <div id="faq-ans-1" class="hidden p-4 font-mono text-sm text-gray-300 border-t border-brand-border">
+                                Evento estritamente para maiores de 18 anos. Entrada permitida apenas mediante apresentação de documento oficial original com foto (RG, CNH ou Passaporte).
+                            </div>
+                        </div>
+
+                        <!-- Q2 -->
+                        <div class="bg-brand-card urban-border">
+                            <button onclick="toggleFaq(2)" class="w-full text-left p-4 font-oswald text-lg text-white flex justify-between items-center focus:outline-none">
+                                <span>2. O evento é coberto ou em área aberta?</span>
+                                <i id="faq-icon-2" class="fa-solid fa-plus text-brand-neonGreen"></i>
+                            </button>
+                            <div id="faq-ans-2" class="hidden p-4 font-mono text-sm text-gray-300 border-t border-brand-border">
+                                O evento acontece no Galpão Industrial do Brás, que possui área principal 100% coberta com ventilação industrial e uma praça externa para alimentação e descanso.
+                            </div>
+                        </div>
+
+                        <!-- Q3 -->
+                        <div class="bg-brand-card urban-border">
+                            <button onclick="toggleFaq(3)" class="w-full text-left p-4 font-oswald text-lg text-white flex justify-between items-center focus:outline-none">
+                                <span>3. Pessoas com deficiência (PCD) têm estrutura adaptada?</span>
+                                <i id="faq-icon-3" class="fa-solid fa-plus text-brand-neonGreen"></i>
+                            </button>
+                            <div id="faq-ans-3" class="hidden p-4 font-mono text-sm text-gray-300 border-t border-brand-border">
+                                Sim, o galpão conta com rampas de acesso, plataforma elevada para visão dos palcos e banheiros acessíveis exclusivos.
+                            </div>
+                        </div>
+
+                        <!-- Q4 -->
+                        <div class="bg-brand-card urban-border">
+                            <button onclick="toggleFaq(4)" class="w-full text-left p-4 font-oswald text-lg text-white flex justify-between items-center focus:outline-none">
+                                <span>4. Posso transferir meu ingresso para outra pessoa?</span>
+                                <i id="faq-icon-4" class="fa-solid fa-plus text-brand-neonGreen"></i>
+                            </button>
+                            <div id="faq-ans-4" class="hidden p-4 font-mono text-sm text-gray-300 border-t border-brand-border">
+                                Sim, a troca de titularidade pode ser realizada em até 48 horas antes do evento diretamente no aplicativo oficial da ticketera.
+                            </div>
+                        </div>
+
+                        <!-- Q5 -->
+                        <div class="bg-brand-card urban-border">
+                            <button onclick="toggleFaq(5)" class="w-full text-left p-4 font-oswald text-lg text-white flex justify-between items-center focus:outline-none">
+                                <span>5. Terá guarda-volumes no local?</span>
+                                <i id="faq-icon-5" class="fa-solid fa-plus text-brand-neonGreen"></i>
+                            </button>
+                            <div id="faq-ans-5" class="hidden p-4 font-mono text-sm text-gray-300 border-t border-brand-border">
+                                Sim! Haverá armários rotativos e guarda-volumes mediante taxa fixa de R$ 20 por período.
+                            </div>
+                        </div>
+
+                        <!-- Q6 -->
+                        <div class="bg-brand-card urban-border">
+                            <button onclick="toggleFaq(6)" class="w-full text-left p-4 font-oswald text-lg text-white flex justify-between items-center focus:outline-none">
+                                <span>6. Quais as formas de pagamento aceitas nos bares?</span>
+                                <i id="faq-icon-6" class="fa-solid fa-plus text-brand-neonGreen"></i>
+                            </button>
+                            <div id="faq-ans-6" class="hidden p-4 font-mono text-sm text-gray-300 border-t border-brand-border">
+                                Aceitamos Cartões de Débito, Crédito e PIX. O festival funcionará com sistema de fichas e cartão consumação reutilizável.
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Form de Contato Visual -->
+                <div class="bg-brand-card p-8 urban-border h-fit">
+                    <span class="text-brand-neonOrange font-mono text-xs font-bold tracking-widest uppercase">// FALE CONOSCO</span>
+                    <h2 class="font-syne text-3xl font-extrabold text-white uppercase mb-6">MANDAR MENSAGEM</h2>
+
+                    <form onsubmit="handleContactSubmit(event)" class="space-y-4">
+                        <div>
+                            <label class="block font-mono text-xs text-gray-400 mb-1">SEU NOME COMPLETO</label>
+                            <input type="text" required placeholder="Ex: Lucas Silva" class="w-full bg-brand-black border border-brand-border p-3 text-white font-mono focus:border-brand-neonGreen focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block font-mono text-xs text-gray-400 mb-1">SEU E-MAIL</label>
+                            <input type="email" required placeholder="Ex: lucas@email.com" class="w-full bg-brand-black border border-brand-border p-3 text-white font-mono focus:border-brand-neonGreen focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block font-mono text-xs text-gray-400 mb-1">ASSUNTO</label>
+                            <select class="w-full bg-brand-black border border-brand-border p-3 text-white font-mono focus:border-brand-neonGreen focus:outline-none">
+                                <option>Dúvidas sobre Ingressos</option>
+                                <option>Imprensa / Credenciamento</option>
+                                <option>Trabalhe Conosco</option>
+                                <option>Outros Assuntos</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-mono text-xs text-gray-400 mb-1">MENSAGEM</label>
+                            <textarea rows="4" required placeholder="Escreva sua dúvida aqui..." class="w-full bg-brand-black border border-brand-border p-3 text-white font-mono focus:border-brand-neonGreen focus:outline-none"></textarea>
+                        </div>
+                        <button type="submit" class="neon-btn w-full py-3 text-lg">ENVIAR MENSAGEM</button>
+                    </form>
+
+                    <div id="contact-success" class="hidden mt-4 p-3 bg-brand-neonGreen text-brand-black font-mono text-sm font-bold">
+                        Mensagem enviada com sucesso! Responderemos em breve.
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-brand-dark border-t border-brand-border py-8 mt-12">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div>
+                <span class="font-syne text-xl font-bold text-white">SUBMUNDO SP © 2026</span>
+                <p class="text-xs font-mono text-brand-grayText mt-1">Festival de Funk & Underground Urbano - Todos os direitos reservados.</p>
+            </div>
+            
+            <div class="text-right font-mono text-xs text-gray-400">
+                <p>Desenvolvido pela Dupla: <strong class="text-brand-neonGreen">Atividade Faculdade IA</strong></p>
+                <p class="text-brand-neonOrange">São Paulo - SP</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- MODAL DRAWER: VS CODE FILES EXPORTER -->
+    <div id="files-modal" class="hidden fixed inset-0 z-50 bg-black bg-opacity-90 flex items-center justify-center p-4">
+        <div class="bg-brand-card urban-border w-full max-w-5xl h-[85vh] flex flex-col">
+            <!-- Modal Header -->
+            <div class="p-4 border-b border-brand-border flex justify-between items-center bg-brand-dark">
+                <div>
+                    <h3 class="font-syne text-2xl font-bold text-white">GERADOR DE ARQUIVOS DO PROJETO (VS CODE)</h3>
+                    <p class="font-mono text-xs text-brand-neonGreen">Copie cada bloco abaixo para montar os 5 arquivos HTML + CSS + README do trabalho</p>
+                </div>
+                <button onclick="toggleModal()" class="text-white hover:text-brand-neonOrange text-2xl p-2 font-bold">&times;</button>
+            </div>
+
+            <!-- Modal Body Tabs -->
+            <div class="flex border-b border-brand-border bg-black font-mono text-xs overflow-x-auto">
+                <button onclick="switchCodeTab('readme')" id="tab-readme" class="px-4 py-3 border-b-2 border-brand-neonGreen text-brand-neonGreen font-bold">README.md</button>
+                <button onclick="switchCodeTab('style')" id="tab-style" class="px-4 py-3 text-gray-400 hover:text-white">style.css</button>
+                <button onclick="switchCodeTab('html-index')" id="tab-html-index" class="px-4 py-3 text-gray-400 hover:text-white">index.html</button>
+                <button onclick="switchCodeTab('html-lineup')" id="tab-html-lineup" class="px-4 py-3 text-gray-400 hover:text-white">lineup.html</button>
+                <button onclick="switchCodeTab('html-ingressos')" id="tab-html-ingressos" class="px-4 py-3 text-gray-400 hover:text-white">ingressos.html</button>
+                <button onclick="switchCodeTab('html-informacoes')" id="tab-html-informacoes" class="px-4 py-3 text-gray-400 hover:text-white">informacoes.html</button>
+                <button onclick="switchCodeTab('html-faq')" id="tab-html-faq" class="px-4 py-3 text-gray-400 hover:text-white">faq.html</button>
+            </div>
+
+            <!-- Code Display Box -->
+            <div class="p-4 flex-grow overflow-y-auto bg-black font-mono text-xs text-green-400">
+                <pre id="code-content" class="whitespace-pre-wrap leading-relaxed select-all"></pre>
+            </div>
+
+            <!-- Modal Footer Controls -->
+            <div class="p-4 border-t border-brand-border flex justify-between items-center bg-brand-dark">
+                <span class="font-mono text-xs text-gray-400">Clique no texto para selecionar tudo e copie (Ctrl + C)</span>
+                <button onclick="copyCodeContent()" class="neon-btn px-6 py-2 text-sm flex items-center gap-2">
+                    <i class="fa-solid fa-copy"></i> Copiar Código do Arquivo
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const codeFiles = {
+            readme: "Submundo SP - Festival de Funk & Underground Urbano\n\nDupla: Aluno 1 e Aluno 2\nSite publicado: https://submundo-sp-festival.vercel.app\n\nBriefing\nPúblico: Jovem urbano (18 a 30 anos), amantes de funk paulista, rave funk e estética underground mandrake.\nClima em 3 palavras: Baile, Concreto, Neon.\nPaleta de Cores: Fundo Escuro (#070709), Verde Neon (#00FF66), Laranja Cyber (#FF3300), Cinza Concreto (#2A2D36).\nFontes: Syne (Títulos brutais), Oswald (Navegação/Subtítulos) e Space Grotesk (Corpo).\nSites de inspiração: Boiler Room, Afropunk e páginas oficiais de festivais de rua SP.\n\nAntes e depois\n![Antes](img/antes.png)\n![Depois](img/depois.png)\n\nOs 4 prompts que mais fizeram diferença\n1. \"Estou criando o site do festival Submundo SP (funk paulista underground no Brás). Crie um estilo com cara de baile de rua brutalista, usando cores escuro asfalto, verde neon (#00FF66) e laranja cyber (#FF3300). Não use gradientes fofos nem cards redondos genéricos de IA.\"\n2. \"Escreva o arquivo index.html completo e estruturado para o festival, garantindo destaque aos artistas DJ Arana, MC Ryan SP e DJ GBR, com informações claras de local no Galpão Industrial do Brás.\"\n3. \"Refatore o arquivo lineup.html criando cards no formato de pôster street urban para 8 artistas, incluindo filtros funcionais por dia e palco.\"\n4. \"Gere o código CSS do arquivo style.css com tipografia marcante importando as fontes Google Fonts 'Syne' e 'Oswald', usando bordas industriais e sem arredondamentos excessivos.\"",
+
+            style: "@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Space+Grotesk:wght@400;600;700&family=Syne:wght@700;800&display=swap');\n\nbody {\n    background-color: #070709;\n    color: #ffffff;\n    font-family: 'Space Grotesk', sans-serif;\n    margin: 0;\n    padding: 0;\n}\n\n.title-glitch {\n    font-family: 'Syne', sans-serif;\n    letter-spacing: -0.04em;\n    text-transform: uppercase;\n    text-shadow: 2px 2px 0px #ff3300, -2px -2px 0px #00ff66;\n}\n\n.urban-border {\n    border: 2px solid #2a2d36;\n    background-color: #16181d;\n    transition: all 0.2s ease;\n}\n\n.urban-border:hover {\n    border-color: #00ff66;\n    box-shadow: 0 0 15px rgba(0, 255, 102, 0.2);\n}\n\n.neon-btn {\n    background-color: #00ff66;\n    color: #070709;\n    font-weight: 700;\n    text-transform: uppercase;\n    font-family: 'Oswald', sans-serif;\n    border: none;\n    cursor: pointer;\n    box-shadow: 4px 4px 0px #ff3300;\n}\n\n.neon-btn:hover {\n    background-color: #ffffff;\n    box-shadow: 6px 6px 0px #00ff66;\n}",
+
+            'html-index': "<!DOCTYPE html>\n<html lang=\"pt-BR\">\n<head>\n    <meta charset=\"UTF-8\">\n    <title>Submundo SP - Início</title>\n    <link rel=\"stylesheet\" href=\"style.css\">\n    <script src=\"https://cdn.tailwindcss.com\"><\/script>\n</head>\n<body class=\"bg-black text-white\">\n    <header class=\"bg-stone-950 border-b border-stone-800 p-4 flex justify-between items-center\">\n        <h1 class=\"font-bold text-2xl text-green-400\">SUBMUNDO SP</h1>\n        <nav class=\"space-x-4\">\n            <a href=\"index.html\" class=\"hover:text-green-400\">Início</a>\n            <a href=\"lineup.html\" class=\"hover:text-green-400\">Line-up</a>\n            <a href=\"ingressos.html\" class=\"hover:text-green-400\">Ingressos</a>\n            <a href=\"informacoes.html\" class=\"hover:text-green-400\">Informações</a>\n            <a href=\"faq.html\" class=\"hover:text-green-400\">FAQ</a>\n        </nav>\n    </header>\n    <main class=\"p-8 text-center\">\n        <h2 class=\"text-6xl font-extrabold text-green-400\">BAILE SUBMUNDO SP 2026</h2>\n        <p class=\"mt-4 text-xl\">14 e 15 de Novembro no Galpão Industrial do Brás</p>\n    </main>\n</body>\n</html>",
+
+            'html-lineup': "<!DOCTYPE html>\n<html lang=\"pt-BR\">\n<head>\n    <meta charset=\"UTF-8\">\n    <title>Submundo SP - Line-up</title>\n    <link rel=\"stylesheet\" href=\"style.css\">\n</head>\n<body class=\"bg-black text-white\">\n    <main class=\"max-w-6xl mx-auto p-8\">\n        <h2 class=\"text-4xl font-bold mb-6\">LINE-UP OFICIAL</h2>\n    </main>\n</body>\n</html>",
+
+            'html-ingressos': "<!DOCTYPE html>\n<html lang=\"pt-BR\">\n<head>\n    <meta charset=\"UTF-8\">\n    <title>Submundo SP - Ingressos</title>\n    <link rel=\"stylesheet\" href=\"style.css\">\n</head>\n<body class=\"bg-black text-white\">\n    <main class=\"max-w-5xl mx-auto p-8\">\n        <h2 class=\"text-4xl font-bold\">INGRESSOS</h2>\n    </main>\n</body>\n</html>",
+
+            'html-informacoes': "<!DOCTYPE html>\n<html lang=\"pt-BR\">\n<head>\n    <meta charset=\"UTF-8\">\n    <title>Submundo SP - Informações</title>\n    <link rel=\"stylesheet\" href=\"style.css\">\n</head>\n<body class=\"bg-black text-white\">\n    <main class=\"max-w-4xl mx-auto p-8\">\n        <h2 class=\"text-4xl font-bold\">ENDEREÇO & REGRAS</h2>\n    </main>\n</body>\n</html>",
+
+            'html-faq': "<!DOCTYPE html>\n<html lang=\"pt-BR\">\n<head>\n    <meta charset=\"UTF-8\">\n    <title>Submundo SP - FAQ & Contato</title>\n    <link rel=\"stylesheet\" href=\"style.css\">\n</head>\n<body class=\"bg-black text-white\">\n    <main class=\"max-w-4xl mx-auto p-8\">\n        <h2 class=\"text-4xl font-bold\">PERGUNTAS FREQUENTES</h2>\n    </main>\n</body>\n</html>"
+        };
+
+        let currentActiveTab = 'readme';
+
+        function toggleModal() {
+            const modal = document.getElementById('files-modal');
+            if (modal) {
+                modal.classList.toggle('hidden');
+                if (!modal.classList.contains('hidden')) {
+                    switchCodeTab(currentActiveTab);
+                }
+            }
+        }
+
+        function switchCodeTab(tabKey) {
+            currentActiveTab = tabKey;
+            const tabs = ['readme', 'style', 'html-index', 'html-lineup', 'html-ingressos', 'html-informacoes', 'html-faq'];
+            tabs.forEach(function(t) {
+                const btn = document.getElementById('tab-' + t);
+                if (btn) {
+                    if (t === tabKey) {
+                        btn.className = "px-4 py-3 border-b-2 border-brand-neonGreen text-brand-neonGreen font-bold";
+                    } else {
+                        btn.className = "px-4 py-3 text-gray-400 hover:text-white";
+                    }
+                }
+            });
+
+            const contentElem = document.getElementById('code-content');
+            if (contentElem) {
+                contentElem.innerText = codeFiles[tabKey] || '';
+            }
+        }
+
+        function copyCodeContent() {
+            const contentElem = document.getElementById('code-content');
+            if (!contentElem) return;
+
+            const codeText = contentElem.innerText;
+            const textarea = document.createElement('textarea');
+            textarea.value = codeText;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+
+            const modal = document.getElementById('files-modal');
+            if (modal) {
+                const toast = document.createElement('div');
+                toast.className = 'fixed top-4 right-4 bg-brand-neonGreen text-black font-mono font-bold px-4 py-2 text-xs z-50 border border-black';
+                toast.innerText = 'Código copiado com sucesso!';
+                document.body.appendChild(toast);
+                setTimeout(function() {
+                    toast.remove();
+                }, 2000);
+            }
+        }
+    </script>
+</body>
+</html>
